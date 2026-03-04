@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안전교육 수료증 발급기</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts for authentic certificate look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- html2pdf.js for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .cert-font {
+            font-family: 'Noto Serif KR', serif;
+        }
+        
+        /* Certificate fixed A4 proportion */
+        #certificate-wrapper {
+            width: 100%;
+            max-width: 794px; /* A4 width */
+            aspect-ratio: 1 / 1.414; /* A4 aspect ratio */
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden; /* 페이지 분할(2장) 방지 1: 자식 요소 넘침 방지 */
+        }
+        
+        /* Stamp/Seal styling */
+        .seal {
+            width: 76px;
+            height: 76px;
+            border: 4px solid #dc2626;
+            border-radius: 50%;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            line-height: 1.15;
+            letter-spacing: -0.05em; /* 늘어난 글자가 꽉 차보이도록 자간 축소 */
+            text-align: center;
+            opacity: 0.85;
+            position: absolute;
+            right: -25px; /* 텍스트 끝에 살짝 걸치도록 위치 */
+            top: 50%;
+            transform: translateY(-50%) rotate(-5deg); /* 도장 느낌을 위해 살짝 회전 */
+            background-color: transparent;
+            mix-blend-mode: multiply;
+        }
+        .seal-inner {
+            border: 1px solid #dc2626;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Left: Input Form -->
+    <div class="w-full md:w-1/3 bg-white border-r border-gray-200 p-8 flex flex-col shadow-lg z-10 h-auto md:h-screen sticky top-0 overflow-y-auto">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">안전교육 수료증</h1>
+            <p class="text-gray-500 mb-8">정보를 입력하고 수료증을 발급받으세요.</p>
+
+            <div class="space-y-5">
+                <!-- Course Name Input -->
+                <div>
+                    <label for="courseName" class="block text-sm font-medium text-gray-700 mb-1">과정명</label>
+                    <input type="text" id="courseName" placeholder="예: 2026년 상반기 재난안전교육" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" onkeyup="updatePreview()">
+                </div>
+
+                <!-- Learner Name Input -->
+                <div>
+                    <label for="learnerName" class="block text-sm font-medium text-gray-700 mb-1">학습자 이름</label>
+                    <input type="text" id="learnerName" placeholder="예: 홍길동" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" onkeyup="updatePreview()">
+                </div>
+
+                <!-- School/Affiliation Input -->
+                <div>
+                    <label for="schoolName" class="block text-sm font-medium text-gray-700 mb-1">학교명 (소속)</label>
+                    <input type="text" id="schoolName" placeholder="예: 한국대학교" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" onkeyup="updatePreview()">
+                </div>
+
+                <!-- Issue Date Input -->
+                <div>
+                    <label for="issueDate" class="block text-sm font-medium text-gray-700 mb-1">발급 일자</label>
+                    <input type="date" id="issueDate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" onchange="updateDatePreview()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue Button -->
+        <div class="mt-auto pt-8">
+            <button onclick="generatePDF()" id="generateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-1 flex justify-center items-center gap-2 text-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                수료증 발급 (PDF)
+            </button>
+        </div>
+    </div>
+
+    <!-- Right: Certificate Preview -->
+    <div class="w-full md:w-2/3 bg-gray-100 p-8 flex items-center justify-center overflow-y-auto relative">
+        <!-- Actual Certificate DOM to be captured -->
+        <div id="certificate-wrapper" class="bg-white">
+            
+            <!-- Outer Navy Border -->
+            <div class="absolute inset-5 border-[12px] border-[#1e3a8a] pointer-events-none"></div>
+            <!-- Inner Gold Border -->
+            <div class="absolute inset-[36px] border-[3px] border-[#bda55d] pointer-events-none"></div>
+            <!-- Subtle Ivory Background -->
+            <div class="absolute inset-[36px] bg-[#fffdf9] pointer-events-none"></div>
+
+            <div id="certificate-content" class="absolute inset-[36px] p-10 flex flex-col justify-between z-10">
+                
+                <!-- Background Watermark -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3/4 h-3/4 text-[#1e3a8a]">
+                      <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08Zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                </div>
+
+                <!-- Top Section -->
+                <div class="text-center pt-2 relative z-20">
+                    <p class="text-[#bda55d] text-lg mb-4 text-left cert-font font-bold tracking-widest" id="certNo">제 2026-0001 호</p>
+                    <div class="inline-block relative">
+                        <h1 class="text-4xl md:text-5xl font-black cert-font tracking-[2rem] text-[#1e3a8a] ml-[2rem] mt-2">수료증</h1>
+                        <div class="h-[2px] w-full bg-[#bda55d] mt-6 opacity-80"></div>
+                    </div>
+                </div>
+
+                <!-- Middle Section: User Details -->
+                <div class="px-8 mt-12 space-y-8 relative z-20">
+                    <div class="flex text-lg cert-font items-end">
+                        <span class="w-32 font-bold text-[#1e3a8a] tracking-widest">소 속 :</span>
+                        <span id="previewSchool" class="font-medium text-gray-900 border-b border-dotted border-gray-400 flex-1 ml-4 pb-2 px-2 text-center">학교명을 입력하세요</span>
+                    </div>
+                    <div class="flex text-lg cert-font items-end">
+                        <span class="w-32 font-bold text-[#1e3a8a] tracking-widest">성 명 :</span>
+                        <span id="previewName" class="font-medium text-gray-900 border-b border-dotted border-gray-400 flex-1 ml-4 pb-2 px-2 text-center">이름을 입력하세요</span>
+                    </div>
+                    <div class="flex text-lg cert-font items-end">
+                        <span class="w-32 font-bold text-[#1e3a8a] tracking-widest">과 정 명 :</span>
+                        <span id="previewCourse" class="font-medium text-gray-900 border-b border-dotted border-gray-400 flex-1 ml-4 pb-2 px-2 text-center">과정명을 입력하세요</span>
+                    </div>
+                </div>
+
+                <!-- Statement Section -->
+                <div class="px-4 text-center my-12 relative z-20">
+                    <p class="text-base leading-[2.4] cert-font text-gray-800 break-keep">
+                        위 사람은<br>
+                        <strong class="text-[#1e3a8a] text-lg">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-lg">안전택</strong>이 주관하는<br>
+                        안전 교육 과정을 성실히 수료하였기에<br>
+                        이 증서를 수여합니다.
+                    </p>
+                </div>
+
+                <!-- Bottom Section: Date and Signees -->
+                <div class="text-center pb-6 relative z-20">
+                    <p id="previewDate" class="text-lg cert-font text-[#1e3a8a] mb-12 font-bold tracking-widest">2026년 03월 04일</p>
+                    
+                    <div class="flex items-center justify-center">
+                        <!-- 첫번째 기관 및 직인 -->
+                        <div class="relative inline-block pr-8">
+                            <h2 class="text-xl font-black cert-font text-gray-900 tracking-widest">
+                                사단법인 한국안전총연맹
+                            </h2>
+                            <div class="seal cert-font">
+                                <div class="seal-inner">
+                                    한국안전<br>총연맹인
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 가운데 악수 이모티콘 (직인과 겹치지 않게 여백 추가) -->
+                        <span class="mx-8 text-xl">🤝</span>
+
+                        <!-- 두번째 기관 및 직인 -->
+                        <div class="relative inline-block pr-8">
+                            <h2 class="text-xl font-black cert-font text-gray-900 tracking-widest">
+                                안전택
+                            </h2>
+                            <div class="seal cert-font">
+                                <div class="seal-inner">
+                                    안전택<br>대표인
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🚨 여기에 구글 앱스 스크립트 배포 후 발급받은 URL을 붙여넣으세요!
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGiOzWT4MBKxpN1-v2yp_ilBfcAJ03yQSUU9fGaH8nghjPQv_qydqnVoWHVzx4ExE/exec';
+
+        // Set today's date on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            
+            // Set date input default value
+            const todayStr = `${year}-${month}-${day}`;
+            document.getElementById('issueDate').value = todayStr;
+            updateDatePreview();
+            
+            // Generate a random certificate number for authenticity
+            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            document.getElementById('certNo').innerText = `제 ${year}-${randomNum} 호`;
+        });
+
+        // Real-time preview update for Text
+        function updatePreview() {
+            const courseName = document.getElementById('courseName').value;
+            const learnerName = document.getElementById('learnerName').value;
+            const schoolName = document.getElementById('schoolName').value;
+
+            document.getElementById('previewCourse').innerText = courseName || '과정명을 입력하세요';
+            document.getElementById('previewName').innerText = learnerName || '이름을 입력하세요';
+            document.getElementById('previewSchool').innerText = schoolName || '학교명을 입력하세요';
+        }
+
+        // Real-time preview update for Date
+        function updateDatePreview() {
+            const dateVal = document.getElementById('issueDate').value;
+            if(dateVal) {
+                const [year, month, day] = dateVal.split('-');
+                document.getElementById('previewDate').innerText = `${year}년 ${month}월 ${day}일`;
+            }
+        }
+
+        // PDF Generation Logic using html2pdf.js
+        function generatePDF() {
+            const learnerName = document.getElementById('learnerName').value;
+            if(!learnerName) {
+                alert("학습자 이름을 입력해주세요.");
+                document.getElementById('learnerName').focus();
+                return;
+            }
+
+            const btn = document.getElementById('generateBtn');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 발급 및 저장 중...`;
+            btn.disabled = true;
+
+            const courseName = document.getElementById('courseName').value;
+            const schoolName = document.getElementById('schoolName').value;
+            const issueDate = document.getElementById('issueDate').value;
+
+            // 1. 구글 스프레드시트로 데이터 전송 (CORS 에러 방지를 위해 mode: 'no-cors' 사용)
+            if (GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL') {
+                const formData = new FormData();
+                formData.append('courseName', courseName);
+                formData.append('learnerName', learnerName);
+                formData.append('schoolName', schoolName);
+                formData.append('issueDate', issueDate);
+
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors'
+                }).catch(err => console.error("시트 저장 실패:", err));
+            } else {
+                console.log("구글 스크립트 URL이 설정되지 않아 데이터가 저장되지 않습니다.");
+            }
+
+            const element = document.getElementById('certificate-wrapper');
+            const filename = `${learnerName}_안전교육_수료증.pdf`;
+
+            const opt = {
+                margin:       0,
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 1 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate and Download PDF
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error("PDF 생성 오류:", err);
+                alert("PDF 생성 중 오류가 발생했습니다.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

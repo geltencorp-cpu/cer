@@ -28,11 +28,8 @@
         /* Certificate fixed A4 proportion */
         #certificate-wrapper {
             width: 100%;
-            max-width: 794px; /* A4 width */
-            aspect-ratio: 1 / 1.414; /* A4 aspect ratio */
+            aspect-ratio: 210 / 297; /* Exact A4 aspect ratio (소수점 오차로 인한 2장 분할 완벽 방지) */
             background: white;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
             position: relative;
             overflow: hidden; /* 페이지 분할(2장) 방지 1: 자식 요소 넘침 방지 */
         }
@@ -119,12 +116,14 @@
 
     <!-- Right: Certificate Preview -->
     <div class="w-full md:w-2/3 bg-gray-100 p-8 flex items-center justify-center overflow-y-auto relative">
-        <!-- Actual Certificate DOM to be captured -->
-        <div id="certificate-wrapper" class="bg-white">
-            
-            <!-- Outer Navy Border -->
-            <div class="absolute inset-5 border-[12px] border-[#1e3a8a] pointer-events-none"></div>
-            <!-- Inner Gold Border -->
+        <!-- 💡 그림자(box-shadow)를 캡처 영역 밖으로 분리하여 PDF 2장 분할 버그 완벽 해결 -->
+        <div class="w-full max-w-[794px] mx-auto shadow-2xl">
+            <!-- Actual Certificate DOM to be captured -->
+            <div id="certificate-wrapper" class="bg-white">
+                
+                <!-- Outer Navy Border -->
+                <div class="absolute inset-5 border-[12px] border-[#1e3a8a] pointer-events-none"></div>
+                <!-- Inner Gold Border -->
             <div class="absolute inset-[36px] border-[3px] border-[#bda55d] pointer-events-none"></div>
             <!-- Subtle Ivory Background -->
             <div class="absolute inset-[36px] bg-[#fffdf9] pointer-events-none"></div>
@@ -135,6 +134,7 @@
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3/4 h-3/4 text-[#1e3a8a]">
                       <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08Zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                    </svg>
                 </div>
 
                 <!-- Top Section -->
@@ -207,6 +207,7 @@
                 </div>
 
             </div>
+        </div>
         </div>
     </div>
 
@@ -299,8 +300,13 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Generate and Download PDF
-            html2pdf().set(opt).from(element).save().then(() => {
+            // Generate and Download PDF (강제로 2페이지 이상 생성될 경우 빈 페이지 삭제 처리)
+            html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = totalPages; i > 1; i--) {
+                    pdf.deletePage(i); // 1페이지를 제외한 모든 페이지 강제 삭제
+                }
+            }).save().then(() => {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }).catch(err => {

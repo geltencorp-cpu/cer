@@ -225,8 +225,8 @@
     </div>
 
     <script>
-        // 🚨 여기에 구글 앱스 스크립트 배포 후 발급받은 URL을 붙여넣으세요!
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGiOzWT4MBKxpN1-v2yp_ilBfcAJ03yQSUU9fGaH8nghjPQv_qydqnVoWHVzx4ExE/exec';
+        // 🚨 새로 발급받은 구글 앱스 스크립트 URL 적용 완료!
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmXcHYgfe6MUtBXolGJrRctycaxkNqfrNrOZz7pzuuEoXTm04K1We4T99NGRUUDbtr/exec';
 
         // Set today's date on load
         document.addEventListener('DOMContentLoaded', () => {
@@ -240,9 +240,8 @@
             document.getElementById('issueDate').value = todayStr;
             updateDatePreview();
             
-            // Generate a random certificate number for authenticity
-            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            document.getElementById('certNo').innerText = `제 ${year}-${randomNum} 호`;
+            // 💡 발급 번호는 시트에서 받아오므로 화면 로딩 시에는 대기 상태로 표시
+            document.getElementById('certNo').innerText = `제 ${year}-#### 호`;
             
             // 초기 로딩 시 입력값에 맞춰 미리보기 업데이트 (소속 줄 숨김 처리 등)
             updatePreview();
@@ -337,50 +336,70 @@
             const courseName = document.getElementById('courseName').value;
             const schoolName = document.getElementById('schoolName').value;
             const issueDate = document.getElementById('issueDate').value;
-
-            // 1. 구글 스프레드시트로 데이터 전송 (CORS 에러 방지를 위해 mode: 'no-cors' 사용)
-            if (GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL') {
-                const formData = new FormData();
-                formData.append('courseName', courseName);
-                formData.append('learnerName', learnerName);
-                formData.append('schoolName', schoolName);
-                formData.append('issueDate', issueDate);
-
-                fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData,
-                    mode: 'no-cors'
-                }).catch(err => console.error("시트 저장 실패:", err));
-            } else {
-                console.log("구글 스크립트 URL이 설정되지 않아 데이터가 저장되지 않습니다.");
-            }
-
+            
             const element = document.getElementById('certificate-wrapper');
             const filename = `${learnerName}_안전교육_수료증.pdf`;
 
-            const opt = {
-                margin:       0,
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            // 실제 PDF를 굽는 공통 함수
+            const executePDFGeneration = () => {
+                const opt = {
+                    margin:       0,
+                    filename:     filename,
+                    image:        { type: 'jpeg', quality: 1 },
+                    html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    for (let i = totalPages; i > 1; i--) {
+                        pdf.deletePage(i);
+                    }
+                }).save().then(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }).catch(err => {
+                    console.error("PDF 생성 오류:", err);
+                    alert("PDF 생성 중 오류가 발생했습니다.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
             };
 
-            // Generate and Download PDF (강제로 2페이지 이상 생성될 경우 빈 페이지 삭제 처리)
-            html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = totalPages; i > 1; i--) {
-                    pdf.deletePage(i); // 1페이지를 제외한 모든 페이지 강제 삭제
-                }
-            }).save().then(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }).catch(err => {
-                console.error("PDF 생성 오류:", err);
-                alert("PDF 생성 중 오류가 발생했습니다.");
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
+            // 1. 구글 스프레드시트로 데이터 전송 및 발급 번호 받아오기
+            if (GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL') {
+                // CORS 문제 없이 폼 데이터 전송하기 위해 URLSearchParams 사용
+                const params = new URLSearchParams();
+                params.append('courseName', courseName);
+                params.append('learnerName', learnerName);
+                params.append('schoolName', schoolName);
+                params.append('issueDate', issueDate);
+
+                // 서버 응답을 받아야 하므로 mode: 'no-cors' 제거
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 서버에서 부여해준 새 번호를 수료증에 즉시 반영
+                        document.getElementById('certNo').innerText = `제 ${data.certNo} 호`;
+                    }
+                    // 번호가 찍힌 후 PDF 굽기 시작
+                    executePDFGeneration();
+                })
+                .catch(err => {
+                    console.error("시트 저장 및 번호 발급 실패:", err);
+                    alert("구글 시트와 통신 중 문제가 발생했습니다. (네트워크 상태나 구글 스크립트 설정을 확인해주세요.)");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            } else {
+                console.log("구글 스크립트 URL이 설정되지 않아 임시 번호로 발급합니다.");
+                document.getElementById('certNo').innerText = `제 2026-9999 호`;
+                executePDFGeneration();
+            }
         }
     </script>
 </body>

@@ -34,37 +34,18 @@
             overflow: hidden; /* 페이지 분할(2장) 방지 1: 자식 요소 넘침 방지 */
         }
         
-        /* Stamp/Seal styling */
-        .seal {
-            width: 76px;
-            height: 76px;
-            border: 4px solid #dc2626;
-            border-radius: 50%;
-            color: #dc2626;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 0.85rem;
-            line-height: 1.15;
-            letter-spacing: -0.05em; /* 늘어난 글자가 꽉 차보이도록 자간 축소 */
-            text-align: center;
-            opacity: 0.85;
+        /* 실제 이미지 직인용 스타일 */
+        .seal-img {
+            width: 80px;
+            height: 80px;
             position: absolute;
-            right: -25px; /* 텍스트 끝에 살짝 걸치도록 위치 */
+            right: -30px; /* 텍스트 끝에 살짝 걸치도록 위치 */
             top: 50%;
-            transform: translateY(-50%) rotate(-5deg); /* 도장 느낌을 위해 살짝 회전 */
-            background-color: transparent;
-            mix-blend-mode: multiply;
-        }
-        .seal-inner {
-            border: 1px solid #dc2626;
-            border-radius: 50%;
-            width: 64px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transform: translateY(-50%) rotate(-3deg);
+            /* 💡 종이에 잉크가 스며든 것처럼 보이게 하는 마법의 속성 */
+            mix-blend-mode: multiply; 
+            opacity: 0.9;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -85,7 +66,27 @@
 
                 <!-- Learner Name Input -->
                 <div>
-                    <label for="learnerName" class="block text-sm font-medium text-gray-700 mb-1">학습자 이름</label>
+                    <div class="flex items-center gap-1 mb-1">
+                        <label for="learnerName" class="block text-sm font-medium text-gray-700">학습자 이름</label>
+                        <!-- Tooltip Group -->
+                        <div class="relative flex items-center group cursor-help">
+                            <!-- Question Mark Icon -->
+                            <div class="text-gray-400 hover:text-blue-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <!-- Tooltip Content -->
+                            <div class="pointer-events-none absolute left-1/2 bottom-full -translate-x-1/2 mb-2 w-max opacity-0 transition-opacity group-hover:opacity-100 z-50">
+                                <div class="bg-gray-800 text-white text-[13px] rounded-lg py-2 px-3 shadow-xl break-keep text-center leading-relaxed">
+                                    기관은 풀 네임을 넣어주세요.<br>
+                                    <span class="text-gray-300">(ex: 안실련 x , 안전실천연합회 o)</span>
+                                </div>
+                                <!-- Tooltip Arrow -->
+                                <div class="w-2 h-2 bg-gray-800 transform rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
                     <input type="text" id="learnerName" placeholder="예: 홍길동" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" onkeyup="updatePreview()">
                 </div>
 
@@ -99,6 +100,21 @@
                 <div>
                     <label for="issueDate" class="block text-sm font-medium text-gray-700 mb-1">발급 일자</label>
                     <input type="date" id="issueDate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" onchange="updateDatePreview()">
+                </div>
+
+                <!-- Issue Organizations Checkboxes -->
+                <div class="pt-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">발급 기관 선택</label>
+                    <div class="flex flex-col gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="chkOrg1" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked onchange="updatePreview()">
+                            <span class="ml-3 text-gray-700 font-medium">사단법인 한국안전총연맹</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="chkOrg2" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked onchange="updatePreview()">
+                            <span class="ml-3 text-gray-700 font-medium">안전택</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,25 +164,28 @@
 
                 <!-- Middle Section: User Details -->
                 <div class="px-8 mt-12 space-y-8 relative z-20">
-                    <div class="flex text-lg cert-font items-end">
-                        <span class="w-32 font-bold text-[#1e3a8a] tracking-widest">소 속 :</span>
-                        <span id="previewSchool" class="font-medium text-gray-900 border-b border-dotted border-gray-400 flex-1 ml-4 pb-2 px-2 text-center">학교명을 입력하세요</span>
+                    <!-- 소속 줄에 ID(schoolRow) 추가 및 기본으로 숨김 처리 -->
+                    <div id="schoolRow" class="flex text-2xl cert-font items-end" style="display: none;">
+                        <span class="w-36 font-bold text-[#1e3a8a] tracking-widest">소 속 :</span>
+                        <span id="previewSchool" class="font-medium text-gray-900 border-b border-dotted border-gray-400 flex-1 ml-4 pb-2 px-2 text-center"></span>
                     </div>
-                    <div class="flex text-lg cert-font items-end">
-                        <span class="w-32 font-bold text-[#1e3a8a] tracking-widest">성 명 :</span>
+                    <div class="flex text-2xl cert-font items-end">
+                        <span id="previewNameLabel" class="w-36 font-bold text-[#1e3a8a] tracking-widest">성 명 :</span>
                         <span id="previewName" class="font-medium text-gray-900 border-b border-dotted border-gray-400 flex-1 ml-4 pb-2 px-2 text-center">이름을 입력하세요</span>
                     </div>
-                    <div class="flex text-lg cert-font items-end">
-                        <span class="w-32 font-bold text-[#1e3a8a] tracking-widest">과 정 명 :</span>
+                    <div class="flex text-2xl cert-font items-end">
+                        <span class="w-36 font-bold text-[#1e3a8a] tracking-widest">과 정 명 :</span>
                         <span id="previewCourse" class="font-medium text-gray-900 border-b border-dotted border-gray-400 flex-1 ml-4 pb-2 px-2 text-center">과정명을 입력하세요</span>
                     </div>
                 </div>
 
                 <!-- Statement Section -->
                 <div class="px-4 text-center my-12 relative z-20">
-                    <p class="text-base leading-[2.4] cert-font text-gray-800 break-keep">
-                        위 사람은<br>
-                        <strong class="text-[#1e3a8a] text-lg">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-lg">안전택</strong>이 주관하는<br>
+                    <!-- 본문 기본 글자 크기 18px -> 22px 로 증가 -->
+                    <p class="text-[22px] leading-[2.4] cert-font text-gray-800 break-keep">
+                        <span id="previewSubject">위 사람은</span><br>
+                        <!-- 강조되는 기관명 크기 20px -> 25px 로 증가 -->
+                        <span id="previewHost"><strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-[25px]">안전택</strong>이</span> 주관하는<br>
                         안전 교육 과정을 성실히 수료하였기에<br>
                         이 증서를 수여합니다.
                     </p>
@@ -174,34 +193,28 @@
 
                 <!-- Bottom Section: Date and Signees -->
                 <div class="text-center pb-6 relative z-20">
-                    <p id="previewDate" class="text-lg cert-font text-[#1e3a8a] mb-12 font-bold tracking-widest">2026년 03월 04일</p>
+                    <p id="previewDate" class="text-xl cert-font text-[#1e3a8a] mb-12 font-bold tracking-widest">2026년 03월 04일</p>
                     
                     <div class="flex items-center justify-center">
                         <!-- 첫번째 기관 및 직인 -->
-                        <div class="relative inline-block pr-8">
-                            <h2 class="text-xl font-black cert-font text-gray-900 tracking-widest">
+                        <div id="org1Sign" class="relative inline-block pr-8">
+                            <h2 class="text-2xl font-black cert-font text-gray-900 tracking-widest">
                                 사단법인 한국안전총연맹
                             </h2>
-                            <div class="seal cert-font">
-                                <div class="seal-inner">
-                                    한국안전<br>총연맹인
-                                </div>
-                            </div>
+                            <!-- 깃허브 Raw 이미지 링크 적용 (한국안전총연맹) -->
+                            <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-ksf.png" crossorigin="anonymous" class="seal-img" alt="한국안전총연맹 직인">
                         </div>
 
                         <!-- 가운데 악수 이모티콘 (직인과 겹치지 않게 여백 추가) -->
-                        <span class="mx-8 text-xl">🤝</span>
+                        <span id="handshakeSign" class="mx-8 text-2xl">🤝</span>
 
                         <!-- 두번째 기관 및 직인 -->
-                        <div class="relative inline-block pr-8">
-                            <h2 class="text-xl font-black cert-font text-gray-900 tracking-widest">
+                        <div id="org2Sign" class="relative inline-block pr-8">
+                            <h2 class="text-2xl font-black cert-font text-gray-900 tracking-widest">
                                 안전택
                             </h2>
-                            <div class="seal cert-font">
-                                <div class="seal-inner">
-                                    안전택<br>대표인
-                                </div>
-                            </div>
+                            <!-- 깃허브 Raw 이미지 링크 적용 (안전택) -->
+                            <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-anjeon.png" crossorigin="anonymous" class="seal-img" alt="안전택 직인">
                         </div>
                     </div>
                 </div>
@@ -230,17 +243,63 @@
             // Generate a random certificate number for authenticity
             const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
             document.getElementById('certNo').innerText = `제 ${year}-${randomNum} 호`;
+            
+            // 초기 로딩 시 입력값에 맞춰 미리보기 업데이트 (소속 줄 숨김 처리 등)
+            updatePreview();
         });
 
         // Real-time preview update for Text
         function updatePreview() {
             const courseName = document.getElementById('courseName').value;
             const learnerName = document.getElementById('learnerName').value;
-            const schoolName = document.getElementById('schoolName').value;
+            const schoolName = document.getElementById('schoolName').value.trim();
 
             document.getElementById('previewCourse').innerText = courseName || '과정명을 입력하세요';
             document.getElementById('previewName').innerText = learnerName || '이름을 입력하세요';
-            document.getElementById('previewSchool').innerText = schoolName || '학교명을 입력하세요';
+            
+            // --- 0. 학교명(소속) 숨김/표시 처리 ---
+            const schoolRow = document.getElementById('schoolRow');
+            if (schoolName === '') {
+                schoolRow.style.display = 'none';
+            } else {
+                schoolRow.style.display = 'flex';
+                document.getElementById('previewSchool').innerText = schoolName;
+            }
+
+            // --- 1. 사람 vs 기관 판단 로직 ---
+            const orgKeywords = ['협회', '사단법인', '법인', '학교', '재단', '연맹', '시청', '구청', '공사', '연대', '협의회', '의회'];
+            const isOrgName = orgKeywords.some(keyword => learnerName.includes(keyword));
+            const previewNameLabel = document.getElementById('previewNameLabel');
+            
+            if (learnerName.trim() === '') {
+                document.getElementById('previewSubject').innerText = '위 사람은'; // 기본값
+                previewNameLabel.innerText = '성 명 :';
+            } else if (isOrgName) {
+                document.getElementById('previewSubject').innerText = '위 기관은';
+                previewNameLabel.innerText = '기 관 명 :';
+            } else {
+                document.getElementById('previewSubject').innerText = '위 사람은';
+                previewNameLabel.innerText = '성 명 :';
+            }
+
+            // --- 2. 발급 기관 선택 로직 ---
+            const isOrg1 = document.getElementById('chkOrg1').checked;
+            const isOrg2 = document.getElementById('chkOrg2').checked;
+            const previewHost = document.getElementById('previewHost');
+            
+            if (isOrg1 && isOrg2) {
+                previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-[25px]">안전택</strong>이`;
+            } else if (isOrg1) {
+                previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>이`;
+            } else if (isOrg2) {
+                previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">안전택</strong>이`;
+            } else {
+                previewHost.innerHTML = ``; // 아무것도 선택 안했을 때
+            }
+
+            document.getElementById('org1Sign').style.display = isOrg1 ? 'inline-block' : 'none';
+            document.getElementById('org2Sign').style.display = isOrg2 ? 'inline-block' : 'none';
+            document.getElementById('handshakeSign').style.display = (isOrg1 && isOrg2) ? 'inline-block' : 'none';
         }
 
         // Real-time preview update for Date
@@ -254,6 +313,13 @@
 
         // PDF Generation Logic using html2pdf.js
         function generatePDF() {
+            const isOrg1 = document.getElementById('chkOrg1').checked;
+            const isOrg2 = document.getElementById('chkOrg2').checked;
+            if(!isOrg1 && !isOrg2) {
+                alert("발급 기관을 최소 1개 이상 선택해주세요.");
+                return;
+            }
+
             const learnerName = document.getElementById('learnerName').value;
             if(!learnerName) {
                 alert("학습자 이름을 입력해주세요.");

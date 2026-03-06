@@ -112,7 +112,7 @@
                         </label>
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="chkOrg2" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked onchange="updatePreview()">
-                            <span class="ml-3 text-gray-700 font-medium">안전택</span>
+                            <span class="ml-3 text-gray-700 font-medium">안전AI 안전택</span>
                         </label>
                     </div>
                 </div>
@@ -184,7 +184,7 @@
                     <p class="text-[22px] leading-[2.4] cert-font text-gray-800 break-keep">
                         <span id="previewSubject">위 사람은</span><br>
                         <!-- 강조되는 기관명 크기 20px -> 25px 로 증가 -->
-                        <span id="previewHost"><strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-[25px]">안전택</strong>이</span> 주관하는<br>
+                        <span id="previewHost"><strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-[25px]">안전AI 안전택</strong>이</span> 주관하는<br>
                         안전 교육 과정을 성실히 수료하였기에<br>
                         이 증서를 수여합니다.
                     </p>
@@ -196,24 +196,26 @@
                     
                     <div class="flex items-center justify-center">
                         <!-- 첫번째 기관 및 직인 -->
-                        <div id="org1Sign" class="relative inline-block pr-8">
-                            <h2 class="text-2xl font-black cert-font text-gray-900 tracking-widest">
+                        <div id="org1Sign" class="relative inline-block pr-6">
+                            <!-- 💡 whitespace-nowrap 추가(줄바꿈 방지) 및 tracking-wider 로 자간 살짝 축소 -->
+                            <h2 class="text-2xl font-black cert-font text-gray-900 tracking-wider whitespace-nowrap">
                                 사단법인 한국안전총연맹
                             </h2>
                             <!-- 깃허브 Raw 이미지 링크 적용 (한국안전총연맹) -->
                             <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-ksf.png" crossorigin="anonymous" class="seal-img" alt="한국안전총연맹 직인">
                         </div>
 
-                        <!-- 가운데 악수 이모티콘 제거 (대신 간격을 띄워주는 투명 여백 역할만 남김) -->
-                        <span id="handshakeSign" class="mx-8 text-2xl"></span>
+                        <!-- 가운데 악수 이모티콘 제거 (대신 간격을 띄워주는 투명 여백 역할만 남김 - 여백 살짝 축소) -->
+                        <span id="handshakeSign" class="mx-4 text-2xl"></span>
 
                         <!-- 두번째 기관 및 직인 -->
-                        <div id="org2Sign" class="relative inline-block pr-8">
-                            <h2 class="text-2xl font-black cert-font text-gray-900 tracking-widest">
-                                안전택
+                        <div id="org2Sign" class="relative inline-block pr-6">
+                            <!-- 💡 whitespace-nowrap 추가(줄바꿈 방지) 및 tracking-wider 로 자간 살짝 축소 -->
+                            <h2 class="text-2xl font-black cert-font text-gray-900 tracking-wider whitespace-nowrap">
+                                안전AI 안전택
                             </h2>
-                            <!-- 깃허브 Raw 이미지 링크 적용 (안전택) -->
-                            <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-anjeon.png" crossorigin="anonymous" class="seal-img" alt="안전택 직인">
+                            <!-- 💡 안전택 직인 이미지 내부의 투명 여백을 보정하기 위해 scale(1.18) 로 약 18% 확대하여 크기 밸런스를 맞춤 -->
+                            <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-anjeon.png" crossorigin="anonymous" class="seal-img" alt="안전AI 안전택 직인" style="transform: translateY(-50%) rotate(-3deg) scale(1.18);">
                         </div>
                     </div>
                 </div>
@@ -286,11 +288,11 @@
             const previewHost = document.getElementById('previewHost');
             
             if (isOrg1 && isOrg2) {
-                previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-[25px]">안전택</strong>이`;
+                previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>과 <strong class="text-[#1e3a8a] text-[25px]">안전AI 안전택</strong>이`;
             } else if (isOrg1) {
                 previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">사단법인 한국안전총연맹</strong>이`;
             } else if (isOrg2) {
-                previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">안전택</strong>이`;
+                previewHost.innerHTML = `<strong class="text-[#1e3a8a] text-[25px]">안전AI 안전택</strong>이`;
             } else {
                 previewHost.innerHTML = ``; // 아무것도 선택 안했을 때
             }

@@ -147,10 +147,9 @@
             <div id="certificate-content" class="absolute inset-[36px] p-10 flex flex-col justify-between z-10">
                 
                 <!-- Background Watermark -->
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3/4 h-3/4 text-[#1e3a8a]">
-                      <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08Zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
-                    </svg>
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06]">
+                    <!-- 깃허브 Raw 이미지 링크 적용 (배경 워터마크 로고) -->
+                    <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/a8a39a250483e408e9f0131adf189bdd14a924e0/background.png" crossorigin="anonymous" class="w-3/4 h-3/4 object-contain" alt="워터마크 로고">
                 </div>
 
                 <!-- Top Section -->
@@ -205,8 +204,8 @@
                             <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-ksf.png" crossorigin="anonymous" class="seal-img" alt="한국안전총연맹 직인">
                         </div>
 
-                        <!-- 가운데 악수 이모티콘 (직인과 겹치지 않게 여백 추가) -->
-                        <span id="handshakeSign" class="mx-8 text-2xl">🤝</span>
+                        <!-- 가운데 악수 이모티콘 제거 (대신 간격을 띄워주는 투명 여백 역할만 남김) -->
+                        <span id="handshakeSign" class="mx-8 text-2xl"></span>
 
                         <!-- 두번째 기관 및 직인 -->
                         <div id="org2Sign" class="relative inline-block pr-8">

@@ -41,7 +41,7 @@
             position: absolute;
             right: -30px; /* 텍스트 끝에 살짝 걸치도록 위치 */
             top: 50%;
-            transform: translateY(-50%) rotate(-3deg);
+            transform: translateY(-50%); /* 💡 기울기(rotate) 제거하여 반듯하게 수정 */
             /* 💡 종이에 잉크가 스며든 것처럼 보이게 하는 마법의 속성 */
             mix-blend-mode: multiply; 
             opacity: 0.9;
@@ -214,8 +214,8 @@
                             <h2 class="text-2xl font-black cert-font text-gray-900 tracking-wider whitespace-nowrap">
                                 안전AI 안전택
                             </h2>
-                            <!-- 💡 안전택 직인 이미지 내부의 투명 여백을 보정하기 위해 scale(1.18) 로 약 18% 확대하여 크기 밸런스를 맞춤 -->
-                            <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-anjeon.png" crossorigin="anonymous" class="seal-img" alt="안전AI 안전택 직인" style="transform: translateY(-50%) rotate(-3deg) scale(1.18);">
+                            <!-- 💡 안전택 직인 이미지 내부의 투명 여백을 보정하기 위해 scale(1.18) 로 약 18% 확대 (기울기 제거) -->
+                            <img src="https://raw.githubusercontent.com/geltencorp-cpu/cer/4879624c00015d401dd65ab83f97a35019088fd7/seal-anjeon.png" crossorigin="anonymous" class="seal-img" alt="안전AI 안전택 직인" style="transform: translateY(-50%) scale(1.18);">
                         </div>
                     </div>
                 </div>
